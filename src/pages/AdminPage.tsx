@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import { Lock, Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
 import { ProductCategory } from '../types';
 
 const AdminPage: React.FC = () => {
