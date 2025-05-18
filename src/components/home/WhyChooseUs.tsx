@@ -1,5 +1,5 @@
+import { CreditCard, MapPin, Truck } from 'lucide-react';
 import React from 'react';
-import { MapPin, Truck, CreditCard } from 'lucide-react';
 
 const WhyChooseUs: React.FC = () => {
   const marketSchedule = [
@@ -11,7 +11,7 @@ const WhyChooseUs: React.FC = () => {
   return (
     <section className="py-12 bg-light">
       <div className="container-custom">
-        <h2 className="section-title text-center mb-10">Pourquoi BonPan ?</h2>
+        <h2 className="section-title text-center mb-10">Pourquoi BonPlan ?</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Market Presence */}

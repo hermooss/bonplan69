@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { Menu, ShoppingBag, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Menu, X, Package } from 'lucide-react';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,7 +40,7 @@ const Header: React.FC = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <ShoppingBag size={28} className="text-secondary" />
-          <span className="text-xl font-montserrat font-bold text-light">BonPan</span>
+          <span className="text-xl font-montserrat font-bold text-light">BonPlan</span>
         </Link>
 
         {/* Desktop Navigation */}

@@ -1,5 +1,5 @@
+import { Calendar, MapPin, MessageCircle, Truck } from 'lucide-react';
 import React from 'react';
-import { MessageCircle, Truck, Calendar, MapPin } from 'lucide-react';
 
 const AboutPage: React.FC = () => {
   const marketSchedule = [
@@ -11,7 +11,7 @@ const AboutPage: React.FC = () => {
   return (
     <div className="py-8 bg-light">
       <div className="container-custom">
-        <h1 className="page-title text-center">À Propos de BonPan</h1>
+        <h1 className="page-title text-center">À Propos de BonPlan</h1>
         
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-lg shadow-card p-6 md:p-8 mb-8">
@@ -19,16 +19,16 @@ const AboutPage: React.FC = () => {
               <div className="w-48 h-48 bg-primary rounded-full overflow-hidden flex-shrink-0">
                 <img 
                   src="https://images.pexels.com/photos/6169740/pexels-photo-6169740.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
-                  alt="Propriétaire de BonPan" 
+                  alt="Propriétaire de BonPlan" 
                   className="w-full h-full object-cover"
                 />
               </div>
               
               <div>
-                <h2 className="text-2xl font-semibold mb-3">Bienvenue sur BonPan</h2>
+                <h2 className="text-2xl font-semibold mb-3">Bienvenue sur BonPlan</h2>
                 <p className="text-gray-700 mb-4">
                   Je suis vendeur basé à Lyon, présent chaque semaine sur différents marchés dans la région lyonnaise. 
-                  BonPan est ma marketplace personnelle qui me permet de proposer mes produits en ligne et d'acheter 
+                  BonPlan est ma marketplace personnelle qui me permet de proposer mes produits en ligne et d'acheter 
                   les vôtres.
                 </p>
                 <p className="text-gray-700">
@@ -107,10 +107,10 @@ const AboutPage: React.FC = () => {
               </a>
               
               <a 
-                href="mailto:contact@bonpan.fr"
+                href="mailto:willy691931@gmail.com"
                 className="bg-secondary hover:bg-secondary-light transition-colors rounded-lg p-4 text-center text-primary"
               >
-                Email: contact@bonpan.fr
+                Email: willy691931@gmail.com
               </a>
             </div>
           </div>
