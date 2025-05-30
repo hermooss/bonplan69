@@ -1,29 +1,32 @@
+import { ArrowLeft, ArrowRight, MapPin, ShoppingBag, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { Product, BasketDetails, ClothingDetails, CarDetails, PhoneDetails } from '../../types';
-import { MapPin, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
+import { BasketDetails, CarDetails, ClothingDetails, PhoneDetails, Product } from '../../types';
 import OrderForm from './OrderForm';
 
 interface ProductDetailProps {
   product: Product;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showOrderForm, setShowOrderForm] = useState(false);
+const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [showOrderForm, setShowOrderForm] = useState<boolean>(false);
 
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+    setCurrentImageIndex((prevIndex: number) => 
+      product.images && product.images.length > 0 && prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
     );
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+    setCurrentImageIndex((prevIndex: number) => 
+      product.images && product.images.length > 0 && prevIndex === 0 ? (product.images.length - 1) : prevIndex - 1
     );
   };
 
   const renderProductSpecificDetails = () => {
+    if (!product.details) {
+      return <div className="text-gray-500">Aucune caractéristique disponible</div>;
+    }
     switch (product.category) {
       case 'baskets':
         const basketDetails = product.details as BasketDetails;
@@ -137,7 +140,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
         return (
           <div>
             <p className="text-gray-600 text-sm">État</p>
-            <p className="font-medium">{product.details.condition}</p>
+            <p className="font-medium">{(product.details as any)?.condition ?? 'Non spécifié'}</p>
           </div>
         );
     }
@@ -149,13 +152,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
         {/* Product Images */}
         <div className="md:w-1/2 relative">
           <div className="h-72 md:h-full relative overflow-hidden">
-            <img 
-              src={product.images[currentImageIndex]} 
-              alt={product.title} 
-              className="w-full h-full object-cover"
-            />
+            {product.images && product.images.length > 0 ? (
+              <img 
+                src={product.images[currentImageIndex]} 
+                alt={product.title} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Aucune image</div>
+            )}
             
-            {product.images.length > 1 && (
+            {product.images && product.images.length > 1 && (
               <>
                 <button 
                   onClick={prevImage}
@@ -176,9 +183,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           </div>
           
           {/* Thumbnails */}
-          {product.images.length > 1 && (
+          {product.images && product.images.length > 1 && (
             <div className="flex p-2 gap-2 overflow-x-auto">
-              {product.images.map((image, index) => (
+              {product.images.map((image: string, index: number) => (
                 <button 
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}

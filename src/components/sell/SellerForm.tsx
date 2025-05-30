@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import { addDoc, collection } from 'firebase/firestore';
 import { Upload, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { db } from '../../firebase';
 
 const SellerForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -41,28 +43,28 @@ const SellerForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
+    await addDoc(collection(db, 'proposals'), {
+      ...formData,
+      price: Number(formData.price),
+      status: 'pending',
+      createdAt: new Date(),
+    });
+    setIsSubmitting(false);
+    setIsSuccess(true);
     setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      
-      // Reset form after delay
-      setTimeout(() => {
-        setIsSuccess(false);
-        setFormData({
-          type: '',
-          description: '',
-          price: '',
-          location: 'France',
-          whatsapp: '',
-          images: []
-        });
-      }, 5000);
-    }, 1500);
+      setIsSuccess(false);
+      setFormData({
+        type: '',
+        description: '',
+        price: '',
+        location: 'France',
+        whatsapp: '',
+        images: []
+      });
+    }, 5000);
   };
 
   if (isSuccess) {

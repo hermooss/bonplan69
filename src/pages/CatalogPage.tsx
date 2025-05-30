@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { collection, getDocs } from 'firebase/firestore';
 import { Filter, X } from 'lucide-react';
-import { products } from '../data/products';
-import { Product, ProductCategory } from '../types';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/products/ProductCard';
+import { db } from '../firebase';
+import { Product, ProductCategory } from '../types';
 
 const categories: { id: ProductCategory; name: string }[] = [
   { id: 'baskets', name: 'Baskets' },
@@ -15,13 +16,28 @@ const categories: { id: ProductCategory; name: string }[] = [
 
 const CatalogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const categoryFilter = searchParams.get('category') as ProductCategory | null;
   const locationFilter = searchParams.get('location') as 'France' | 'Algérie' | null;
   const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : null;
   const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : null;
+  
+  // Fetch products from Firestore
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      const querySnapshot = await getDocs(collection(db, 'products'));
+      const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(productsData);
+      setIsLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
   
   // Filter products when params change
   useEffect(() => {
@@ -48,7 +64,7 @@ const CatalogPage: React.FC = () => {
     }
     
     setFilteredProducts(result);
-  }, [categoryFilter, locationFilter, minPrice, maxPrice]);
+  }, [products, categoryFilter, locationFilter, minPrice, maxPrice]);
   
   const handleCategoryChange = (category: ProductCategory | null) => {
     if (category) {

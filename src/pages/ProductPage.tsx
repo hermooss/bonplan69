@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { ArrowLeft, Tag } from 'lucide-react';
-import { products } from '../data/products';
-import { Product } from '../types';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import ProductDetail from '../components/products/ProductDetail';
+import { db } from '../firebase';
+import { Product } from '../types';
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,19 +13,24 @@ const ProductPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Find the product
-    const foundProduct = products.find(p => p.id === id);
-    
-    if (foundProduct) {
-      setProduct(foundProduct);
-      
-      // Find related products (same category but not the same product)
-      const related = products
-        .filter(p => p.category === foundProduct.category && p.id !== foundProduct.id)
-        .slice(0, 3);
-      
-      setRelatedProducts(related);
-    }
+    const fetchProduct = async () => {
+      if (!id) return;
+      console.log("Fetching product with id:", id);
+      const productDoc = await getDoc(doc(db, 'products', id));
+      if (productDoc.exists()) {
+        const productData = { id: productDoc.id, ...productDoc.data() } as Product;
+        console.log("Product data:", productData);
+        setProduct(productData);
+        const querySnapshot = await getDocs(collection(db, 'products'));
+        const allProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const related = allProducts.filter(p => p.category === productData.category && p.id !== productData.id).slice(0, 3);
+        setRelatedProducts(related);
+      } else {
+        console.log("Product not found (id:", id, ")");
+        setProduct(null);
+      }
+    };
+    fetchProduct();
   }, [id]);
 
   if (!product) {

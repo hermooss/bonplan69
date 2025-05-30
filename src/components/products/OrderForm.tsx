@@ -1,6 +1,7 @@
+import { addDoc, collection } from 'firebase/firestore';
 import React, { useState } from 'react';
+import { db } from '../../firebase';
 import { Product } from '../../types';
-import { X } from 'lucide-react';
 
 interface OrderFormProps {
   product: Product;
@@ -22,20 +23,23 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
+    await addDoc(collection(db, 'orders'), {
+      product,
+      customerName: formData.name,
+      whatsapp: formData.whatsapp,
+      address: formData.address,
+      message: formData.message,
+      status: 'pending',
+      createdAt: new Date(),
+    });
+    setIsSubmitting(false);
+    setIsSuccess(true);
     setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      
-      // Close form after success message
-      setTimeout(() => {
-        onClose();
-      }, 3000);
-    }, 1500);
+      onClose();
+    }, 3000);
   };
 
   if (isSuccess) {

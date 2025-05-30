@@ -1,6 +1,19 @@
+import { addDoc, collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { Lock, Plus, X } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { db } from '../firebase';
 import { ProductCategory } from '../types';
+
+interface ProductData {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: ProductCategory;
+  location: string;
+  images: string[];
+  createdAt: Date;
+}
 
 const AdminPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,6 +29,9 @@ const AdminPage: React.FC = () => {
     location: 'France',
     images: [] as string[]
   });
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [proposals, setProposals] = useState<any[]>([]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,11 +61,31 @@ const AdminPage: React.FC = () => {
     }));
   };
 
-  const handleProductSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const querySnapshot = await getDocs(collection(db, 'products'));
+      setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductData)));
+    };
+    const fetchOrders = async () => {
+      const querySnapshot = await getDocs(collection(db, 'orders'));
+      setOrders(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
+    const fetchProposals = async () => {
+      const querySnapshot = await getDocs(collection(db, 'proposals'));
+      setProposals(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
+    fetchProducts();
+    fetchOrders();
+    fetchProposals();
+  }, [showAddProduct]);
+
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('New product:', newProduct);
-    // Reset form and close modal
+    await addDoc(collection(db, 'products'), {
+      ...newProduct,
+      price: Number(newProduct.price),
+      createdAt: new Date(),
+    });
     setNewProduct({
       title: '',
       description: '',
@@ -59,6 +95,15 @@ const AdminPage: React.FC = () => {
       images: []
     });
     setShowAddProduct(false);
+  };
+
+  const deleteAllProducts = async () => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer tous les produits ? Cette action est irréversible.')) {
+      const querySnapshot = await getDocs(collection(db, 'products'));
+      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      setProducts([]);
+    }
   };
 
   if (!isAuthenticated) {
@@ -153,13 +198,22 @@ const AdminPage: React.FC = () => {
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold">Gestion des produits</h2>
-                <button 
-                  onClick={() => setShowAddProduct(true)}
-                  className="btn btn-primary flex items-center gap-2"
-                >
-                  <Plus size={18} />
-                  Ajouter un produit
-                </button>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={deleteAllProducts}
+                    className="btn btn-error flex items-center gap-2"
+                  >
+                    <X size={18} />
+                    Supprimer tous les produits
+                  </button>
+                  <button 
+                    onClick={() => setShowAddProduct(true)}
+                    className="btn btn-primary flex items-center gap-2"
+                  >
+                    <Plus size={18} />
+                    Ajouter un produit
+                  </button>
+                </div>
               </div>
               
               <div className="overflow-x-auto">
@@ -174,26 +228,29 @@ const AdminPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-light-gray">
-                    {/* Demo data */}
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <img className="h-10 w-10 rounded-md object-cover" src="https://images.pexels.com/photos/1456706/pexels-photo-1456706.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="" />
+                    {products.map(product => (
+                      <tr key={product.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              <img className="h-10 w-10 rounded-md object-cover" src={product.images?.[0] || ''} alt="" />
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{product.title}</div>
+                            </div>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">Nike Air Jordan 1 Mid</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Baskets</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">140 €</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">France</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-primary hover:text-primary-dark mr-3">Modifier</button>
-                        <button className="text-error hover:text-error-dark">Supprimer</button>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.price} €</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.location}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button className="text-error hover:text-error-dark" onClick={async () => {
+                            await deleteDoc(doc(db, 'products', product.id));
+                            setProducts(products.filter(p => p.id !== product.id));
+                          }}>Supprimer</button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -217,23 +274,25 @@ const AdminPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-light-gray">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">Martin Dupont</div>
-                        <div className="text-sm text-gray-500">+33 6 12 34 56 78</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Nike Air Jordan 1 Mid</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">140 €</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12/04/2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          Confirmée
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-primary hover:text-primary-dark">Détails</button>
-                      </td>
-                    </tr>
+                    {orders.map(order => (
+                      <tr key={order.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{order.customerName}</div>
+                          <div className="text-sm text-gray-500">{order.whatsapp}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.product?.title}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.product?.price} €</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : ''}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button className="text-primary hover:text-primary-dark">Détails</button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -257,23 +316,22 @@ const AdminPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-light-gray">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">Ahmed Benzema</div>
-                        <div className="text-sm text-gray-500">+33 7 11 22 33 44</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Baskets</td>
-                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                        Adidas Yeezy Boost 350 V2, taille 43, portées 2 fois
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">180 €</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">14/04/2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-primary hover:text-primary-dark mr-2">Voir</button>
-                        <button className="text-success hover:text-success-dark mr-2">Accepter</button>
-                        <button className="text-error hover:text-error-dark">Refuser</button>
-                      </td>
-                    </tr>
+                    {proposals.map(proposal => (
+                      <tr key={proposal.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{proposal.whatsapp}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{proposal.type}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{proposal.description}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{proposal.price} €</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{proposal.createdAt?.toDate ? proposal.createdAt.toDate().toLocaleDateString() : ''}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button className="text-primary hover:text-primary-dark mr-2">Voir</button>
+                          <button className="text-success hover:text-success-dark mr-2">Accepter</button>
+                          <button className="text-error hover:text-error-dark">Refuser</button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -300,52 +358,63 @@ const AdminPage: React.FC = () => {
               <form onSubmit={handleProductSubmit}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="product-title" className="block text-sm font-medium text-gray-700 mb-1">
                       Titre
                     </label>
                     <input
                       type="text"
+                      id="product-title"
                       value={newProduct.title}
                       onChange={(e) => setNewProduct({...newProduct, title: e.target.value})}
                       className="input-field"
+                      placeholder="Entrez le titre du produit"
                       required
+                      aria-label="Titre du produit"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="product-description" className="block text-sm font-medium text-gray-700 mb-1">
                       Description
                     </label>
                     <textarea
+                      id="product-description"
                       value={newProduct.description}
                       onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
                       className="input-field min-h-[100px]"
+                      placeholder="Décrivez le produit en détail"
                       required
+                      aria-label="Description du produit"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="product-price" className="block text-sm font-medium text-gray-700 mb-1">
                       Prix (€)
                     </label>
                     <input
                       type="number"
+                      id="product-price"
                       value={newProduct.price}
                       onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
                       className="input-field"
+                      placeholder="Entrez le prix en euros"
                       required
+                      aria-label="Prix du produit"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="product-category" className="block text-sm font-medium text-gray-700 mb-1">
                       Catégorie
                     </label>
                     <select
+                      id="product-category"
                       value={newProduct.category}
                       onChange={(e) => setNewProduct({...newProduct, category: e.target.value as ProductCategory})}
                       className="input-field"
                       required
+                      aria-label="Catégorie du produit"
                     >
                       <option value="">Sélectionner une catégorie</option>
                       <option value="baskets">Baskets</option>
@@ -357,14 +426,16 @@ const AdminPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="product-location" className="block text-sm font-medium text-gray-700 mb-1">
                       Localisation
                     </label>
                     <select
+                      id="product-location"
                       value={newProduct.location}
                       onChange={(e) => setNewProduct({...newProduct, location: e.target.value})}
                       className="input-field"
                       required
+                      aria-label="Localisation du produit"
                     >
                       <option value="France">France</option>
                       <option value="Algérie">Algérie</option>
