@@ -1,35 +1,30 @@
 import { collection, getDocs } from 'firebase/firestore';
-import { ChevronRight } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { db } from '../../firebase';
 import { Product } from '../../types';
 import ProductCard from '../products/ProductCard';
 
-const FeaturedProducts: React.FC = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+const PromotionsSection: React.FC = () => {
+  const [promoProducts, setPromoProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFeaturedProducts = async () => {
+    const fetchPromoProducts = async () => {
       setIsLoading(true);
       const querySnapshot = await getDocs(collection(db, 'products'));
       const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-      const featured = products.filter(p => p.featured);
-      setFeaturedProducts(featured);
+      const promo = products.filter(p => p.promo);
+      setPromoProducts(promo);
       setIsLoading(false);
     };
-
-    fetchFeaturedProducts();
+    fetchPromoProducts();
   }, []);
 
-  if (isLoading) {
-    return (
-      <section className="py-12 bg-light-gray/30">
-        <div className="container-custom">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="section-title mb-0">Bonnes affaires du jour</h2>
-          </div>
+  return (
+    <section className="py-8 bg-yellow-50">
+      <div className="container-custom">
+        <h2 className="section-title mb-4">Promotions</h2>
+        {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card animate-pulse">
@@ -41,36 +36,18 @@ const FeaturedProducts: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (featuredProducts.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className="py-12 bg-light-gray/30">
-      <div className="container-custom">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="section-title mb-0">Bonnes affaires du jour</h2>
-          <Link 
-            to="/acheter" 
-            className="flex items-center text-secondary hover:text-secondary-dark transition-colors font-medium"
-          >
-            Voir tout <ChevronRight size={18} />
-          </Link>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        ) : promoProducts.length === 0 ? (
+          <div className="text-center text-gray-400 py-8">Aucune promotion en cours.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {promoProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 };
 
-export default FeaturedProducts;
+export default PromotionsSection;

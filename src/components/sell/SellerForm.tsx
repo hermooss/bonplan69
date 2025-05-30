@@ -20,18 +20,43 @@ const SellerForm: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
-      const imageURLs = filesArray.map(file => URL.createObjectURL(file));
       
-      if (formData.images.length + imageURLs.length <= 5) {
-        setFormData(prev => ({
-          ...prev,
-          images: [...prev.images, ...imageURLs]
-        }));
-      } else {
-        alert('Vous pouvez télécharger maximum 5 images');
+      for (const file of filesArray) {
+        if (formData.images.length >= 5) {
+          alert('Vous pouvez télécharger maximum 5 images');
+          break;
+        }
+
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+        uploadFormData.append('upload_preset', 'bonplan_preset');
+        uploadFormData.append('cloud_name', 'drfqjjahv');
+
+        try {
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/drfqjjahv/image/upload`,
+            {
+              method: 'POST',
+              body: uploadFormData,
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error('Upload failed');
+          }
+
+          const data = await response.json();
+          setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, data.secure_url]
+          }));
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          alert('Erreur lors du téléchargement de l\'image');
+        }
       }
     }
   };
@@ -166,9 +191,10 @@ const SellerForm: React.FC = () => {
           value={formData.whatsapp}
           onChange={handleChange}
           className="input-field"
-          placeholder="+33 6 XX XX XX XX"
+          placeholder="33612345678"
           required
         />
+        <span className="text-xs text-gray-500 mt-1 block">Format : 33612345678 (pour lien WhatsApp)</span>
       </div>
       
       <div className="mb-6">

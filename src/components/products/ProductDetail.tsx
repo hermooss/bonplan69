@@ -148,10 +148,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="md:flex">
+      <div className="md:flex flex-col md:flex-row">
         {/* Product Images */}
-        <div className="md:w-1/2 relative">
-          <div className="h-72 md:h-full relative overflow-hidden">
+        <div className="md:w-1/2 w-full relative">
+          <div className="h-56 sm:h-72 md:h-full relative overflow-hidden">
             {product.images && product.images.length > 0 ? (
               <img 
                 src={product.images[currentImageIndex]} 
@@ -159,21 +159,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Aucune image</div>
+              <div className="w-full h-full flex items-center justify-center bg-neutral text-primary">Aucune image</div>
             )}
-            
             {product.images && product.images.length > 1 && (
               <>
                 <button 
                   onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-primary/80 text-secondary p-2 rounded-full hover:bg-primary transition-colors"
                   aria-label="Image précédente"
                 >
                   <ArrowLeft size={20} />
                 </button>
                 <button 
                   onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary/80 text-secondary p-2 rounded-full hover:bg-primary transition-colors"
                   aria-label="Image suivante"
                 >
                   <ArrowRight size={20} />
@@ -181,7 +180,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
               </>
             )}
           </div>
-          
           {/* Thumbnails */}
           {product.images && product.images.length > 1 && (
             <div className="flex p-2 gap-2 overflow-x-auto">
@@ -189,46 +187,51 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
                 <button 
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`h-16 w-16 flex-shrink-0 border-2 transition-colors ${
-                    index === currentImageIndex ? 'border-secondary' : 'border-transparent'
-                  }`}
+                  className={`h-12 w-12 flex-shrink-0 border-2 transition-colors rounded-md ${index === currentImageIndex ? 'border-accent' : 'border-transparent'}`}
                 >
-                  <img src={image} alt={`Miniature ${index + 1}`} className="h-full w-full object-cover" />
+                  <img src={image} alt={`Miniature ${index + 1}`} className="h-full w-full object-cover rounded-md" />
                 </button>
               ))}
             </div>
           )}
         </div>
-        
         {/* Product Info */}
-        <div className="p-6 md:w-1/2">
-          <div className="flex items-center mb-2">
-            <span className="bg-primary/10 text-primary text-xs font-medium px-2 py-1 rounded mr-2">
+        <div className="p-4 sm:p-6 md:w-1/2 w-full flex flex-col">
+          <div className="flex items-center mb-2 flex-wrap gap-2">
+            <span className="bg-primary/10 text-primary text-xs font-medium px-2 py-1 rounded">
               {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
             </span>
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-xs text-neutral">
               <MapPin size={14} className="mr-1" />
               {product.location}
             </div>
           </div>
-          
-          <h1 className="text-2xl font-bold text-primary mb-2">{product.title}</h1>
-          <p className="text-3xl font-bold text-secondary mb-4">{product.price.toLocaleString('fr-FR')} €</p>
-          
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Description</h2>
-            <p className="text-gray-700">{product.description}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-primary mb-2">{product.title}</h1>
+          <p className="text-2xl sm:text-3xl font-bold text-accent mb-4">{product.price.toLocaleString('fr-FR')} €</p>
+          <div className="mb-4">
+            <h2 className="text-base sm:text-lg font-semibold mb-2">Description</h2>
+            <p className="text-primary text-sm sm:text-base">{product.description}</p>
           </div>
-          
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-4">Caractéristiques</h2>
+          <div className="mb-4">
+            <h2 className="text-base sm:text-lg font-semibold mb-2">Tailles disponibles</h2>
+            {product.sizes && product.sizes.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {product.sizes.map(size => (
+                  <span key={size} className="bg-primary/10 text-primary px-2 py-1 rounded text-xs sm:text-sm font-medium">{size}</span>
+                ))}
+              </div>
+            ) : (
+              <div className="text-neutral">Aucune taille disponible</div>
+            )}
+          </div>
+          <div className="mb-4">
+            <h2 className="text-base sm:text-lg font-semibold mb-2">Caractéristiques</h2>
             {renderProductSpecificDetails()}
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 mt-auto">
             <button 
               onClick={() => setShowOrderForm(true)}
-              className="btn btn-primary flex-1 flex items-center justify-center gap-2"
+              className="btn btn-primary flex-1 flex items-center justify-center gap-2 text-base sm:text-lg"
             >
               <ShoppingBag size={18} />
               Commander
@@ -237,24 +240,23 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
               href={`https://wa.me/33773622884?text=Bonjour, je suis intéressé par : ${product.title} (${product.price}€)`}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-outline flex-1 text-center"
+              className="btn btn-outline flex-1 text-center text-primary border-primary text-base sm:text-lg"
             >
               Contacter sur WhatsApp
             </a>
           </div>
         </div>
       </div>
-      
       {/* Order Form Modal */}
       {showOrderForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-2 sm:px-4">
+          <div className="bg-secondary rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Commander le produit</h2>
+                <h2 className="text-lg sm:text-xl font-bold">Commander le produit</h2>
                 <button 
                   onClick={() => setShowOrderForm(false)}
-                  className="text-gray-500 hover:text-primary"
+                  className="text-neutral hover:text-accent"
                 >
                   <X size={20} />
                 </button>

@@ -1,7 +1,8 @@
 import { CreditCard, MapPin, Truck } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 
 const WhyChooseUs: React.FC = () => {
+  const [showMore, setShowMore] = useState(false);
   const marketSchedule = [
     { day: 'Dimanche', location: 'Charpennes' },
     { day: 'Mardi & Jeudi', location: 'Gratte-Ciel' },
@@ -9,53 +10,44 @@ const WhyChooseUs: React.FC = () => {
   ];
 
   return (
-    <section className="py-12 bg-light">
+    <section className="py-4 bg-light">
       <div className="container-custom">
-        <h2 className="section-title text-center mb-10">Pourquoi BonPlan ?</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Market Presence */}
-          <div className="card p-6">
-            <div className="mb-6 flex items-center">
-              <div className="bg-primary/10 p-3 rounded-full mr-4">
-                <MapPin size={24} className="text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold">Présent sur les marchés</h3>
-            </div>
-            
-            <ul className="space-y-3">
+        <h2 className="section-title text-center mb-2 text-base sm:text-lg">Pourquoi BonPlan ?</h2>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-center text-xs sm:text-sm">
+          <div className="flex items-center gap-1">
+            <MapPin size={16} className="text-primary" />
+            Présent sur les marchés
+          </div>
+          <div className="flex items-center gap-1">
+            <Truck size={16} className="text-primary" />
+            Livraison à tout moment
+          </div>
+          <div className="flex items-center gap-1">
+            <CreditCard size={16} className="text-primary" />
+            Paiement flexible
+          </div>
+        </div>
+        {!showMore && (
+          <div className="flex justify-center mt-2">
+            <button className="text-primary underline text-xs" onClick={() => setShowMore(true)}>En savoir plus</button>
+          </div>
+        )}
+        {showMore && (
+          <div className="mt-2 text-xs sm:text-sm animate-fade-in">
+            <div className="mb-1 font-semibold">Marchés :</div>
+            <ul className="mb-1">
               {marketSchedule.map((schedule, index) => (
                 <li key={index} className="flex items-center">
-                  <span className="text-secondary font-medium mr-3">{schedule.day}:</span>
+                  <span className="text-blue-900 font-medium mr-2">{schedule.day}:</span>
                   <span>{schedule.location}</span>
                 </li>
               ))}
             </ul>
+            <div className="mb-1"><b>Livraison :</b> France & Algérie, contactez-nous pour plus de détails.</div>
+            <div><b>Paiement :</b> À la livraison ou via WhatsApp.</div>
+            <button className="text-primary underline text-xs mt-2" onClick={() => setShowMore(false)}>Réduire</button>
           </div>
-          
-          {/* Delivery and Payment */}
-          <div className="flex flex-col gap-4 h-full">
-            <div className="card p-6 flex-1">
-              <div className="mb-4 flex items-center">
-                <div className="bg-primary/10 p-3 rounded-full mr-4">
-                  <Truck size={24} className="text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold">Livraison à tout moment</h3>
-              </div>
-              <p>Service de livraison disponible dans toute la France et même en Algérie. Contactez-nous pour plus de détails.</p>
-            </div>
-            
-            <div className="card p-6 flex-1">
-              <div className="mb-4 flex items-center">
-                <div className="bg-primary/10 p-3 rounded-full mr-4">
-                  <CreditCard size={24} className="text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold">Paiement flexible</h3>
-              </div>
-              <p>Paiement à la livraison ou via contact WhatsApp. Simple, sécurisé et adapté à vos besoins.</p>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

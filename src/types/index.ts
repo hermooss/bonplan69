@@ -8,8 +8,11 @@ export interface Product {
   location: 'France' | 'Algérie';
   available: boolean;
   featured?: boolean;
+  promo?: boolean;
   details: ProductDetails;
   createdAt: Date;
+  sizes?: string[];
+  marketDays?: string[];
 }
 
 export type ProductCategory = 'baskets' | 'vetements' | 'voitures' | 'telephones' | 'autres';

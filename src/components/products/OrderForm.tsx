@@ -13,12 +13,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
     name: '',
     whatsapp: '',
     address: '',
-    message: ''
+    message: '',
+    size: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -32,6 +33,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
       whatsapp: formData.whatsapp,
       address: formData.address,
       message: formData.message,
+      size: product.sizes && product.sizes.length > 0 ? formData.size : undefined,
       status: 'pending',
       createdAt: new Date(),
     });
@@ -57,9 +59,30 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="mb-4">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      {product.sizes && product.sizes.length > 0 && (
+        <div className="mb-2">
+          <label htmlFor="size" className="block text-xs sm:text-sm font-medium text-primary mb-1">
+            Taille à commander
+          </label>
+          <select
+            id="size"
+            name="size"
+            value={formData.size}
+            onChange={handleChange}
+            className="input-field text-xs sm:text-sm"
+            required
+            aria-label="Taille à commander"
+          >
+            <option value="">Sélectionner une taille</option>
+            {product.sizes.map(size => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+        </div>
+      )}
+      <div className="mb-2">
+        <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-primary mb-1">
           Nom complet
         </label>
         <input
@@ -68,13 +91,12 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="input-field"
+          className="input-field text-xs sm:text-sm"
           required
         />
       </div>
-      
-      <div className="mb-4">
-        <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="mb-2">
+        <label htmlFor="whatsapp" className="block text-xs sm:text-sm font-medium text-primary mb-1">
           Numéro WhatsApp
         </label>
         <input
@@ -83,14 +105,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
           name="whatsapp"
           value={formData.whatsapp}
           onChange={handleChange}
-          className="input-field"
-          placeholder="+33 6 XX XX XX XX"
+          className="input-field text-xs sm:text-sm"
+          placeholder="33612345678"
           required
         />
+        <span className="text-xs text-gray-500 mt-1 block">Format : 33612345678 (pour lien WhatsApp)</span>
       </div>
-      
-      <div className="mb-4">
-        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="mb-2">
+        <label htmlFor="address" className="block text-xs sm:text-sm font-medium text-primary mb-1">
           Adresse de livraison (facultative)
         </label>
         <input
@@ -99,12 +121,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
           name="address"
           value={formData.address}
           onChange={handleChange}
-          className="input-field"
+          className="input-field text-xs sm:text-sm"
         />
       </div>
-      
-      <div className="mb-6">
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="mb-2">
+        <label htmlFor="message" className="block text-xs sm:text-sm font-medium text-primary mb-1">
           Message (facultatif)
         </label>
         <textarea
@@ -112,21 +133,20 @@ const OrderForm: React.FC<OrderFormProps> = ({ product, onClose }) => {
           name="message"
           value={formData.message}
           onChange={handleChange}
-          className="input-field min-h-[100px]"
+          className="input-field min-h-[80px] text-xs sm:text-sm"
         ></textarea>
       </div>
-      
-      <div className="flex justify-between gap-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4 mt-4">
         <button
           type="button"
           onClick={onClose}
-          className="btn btn-outline flex-1"
+          className="btn btn-outline flex-1 text-xs sm:text-sm"
         >
           Annuler
         </button>
         <button
           type="submit"
-          className="btn btn-primary flex-1"
+          className="btn btn-primary flex-1 text-xs sm:text-sm"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Envoi en cours...' : 'Envoyer la commande'}
